@@ -42,12 +42,20 @@
 ### 3. docker-compose.prod.yml (Production)
 **Locație**: `./docker-compose.prod.yml`
 
+**Servicii pornite**:
+- `app` – FastAPI (Gunicorn)
+- `web` – Next.js build (servit pe portul 3000 în rețea internă)
+- `nginx` – termină TLS + reverse proxy pentru API și Web
+- `certbot` – container utilitar pentru renew
+- `db` – PostgreSQL 15
+- `redis` – Redis 7
+
 **Diferențe față de development**:
-- ✅ Target: production (Gunicorn)
+- ✅ Target: production (Gunicorn + Next.js `npm start`)
 - ✅ No hot-reload
 - ✅ Resource limits (CPU/Memory)
 - ✅ Restart: always
-- ✅ Environment: .env.production
+- ✅ Environment: `.env`
 
 ---
 

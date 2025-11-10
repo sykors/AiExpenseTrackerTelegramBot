@@ -138,7 +138,7 @@ EXPOSE ${APP_PORT}
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:${APP_PORT}/health || exit 1
+    CMD curl -f http://localhost:${APP_PORT}/api/v1/health || exit 1
 
 # Volume mounts for persistent data
 VOLUME ["/app/uploads", "/app/logs"]

@@ -19,12 +19,14 @@ type SummaryCardsProps = {
   summary: SummaryStats;
   variant?: "default" | "stacked";
   className?: string;
+  rangeLabel?: string;
 };
 
 export function SummaryCards({
   summary,
   variant = "default",
   className = "",
+  rangeLabel,
 }: SummaryCardsProps) {
   const cards = [
     {
@@ -113,6 +115,11 @@ export function SummaryCards({
           de {formatCurrency(summary.comparison_previous_month.previous_total)}
         </p>
       </div>
+      {rangeLabel && (
+        <p className="col-span-full text-xs uppercase tracking-[0.25em] text-white/50">
+          Interval selectat: {rangeLabel}
+        </p>
+      )}
     </section>
   );
 }

@@ -23,7 +23,9 @@
       "Bash(/usr/local/bin/docker compose up --build -d)",
       "Bash(export TELEGRAM_BOT_TOKEN=\"8260315731:AAHmndoA83ipjp373bH4dFT0uNqtMIvNLCk\")",
       "Bash(curl:*)",
-      "Bash(/usr/local/bin/docker compose logs app --tail=20)"
+      "Bash(/usr/local/bin/docker compose logs app --tail=20)",
+      "Bash(tree:*)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@65.21.110.105 \"uname -a && cat /etc/os-release && df -h && free -m\")"
     ],
     "deny": [],
     "ask": []

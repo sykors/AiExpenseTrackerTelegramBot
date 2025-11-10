@@ -36,10 +36,15 @@ export function ExpenseTrendChart({ data }: Props) {
           tick={{ fill: "#94a3b8", fontSize: 12 }}
         />
         <YAxis
-          width={60}
+          width={80}
           axisLine={false}
           tickLine={false}
           tick={{ fill: "#94a3b8", fontSize: 12 }}
+          tickFormatter={(value: number) =>
+            new Intl.NumberFormat("ro-RO", {
+              maximumFractionDigits: 0,
+            }).format(value)
+          }
         />
         <Tooltip
           cursor={{ stroke: "#38bdf8", strokeDasharray: 4, strokeWidth: 1 }}

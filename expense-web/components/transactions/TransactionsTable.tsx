@@ -178,10 +178,7 @@ export function TransactionsTable({ expenses, categories }: Props) {
     setFormValues({
       vendor: expense.vendor || "",
       category_id: fallbackCategoryId,
-      amount:
-        typeof expense.amount === "number"
-          ? expense.amount.toString()
-          : (expense.amount ?? "").toString(),
+      amount: String(expense.amount ?? ""),
     });
   };
 
@@ -779,6 +776,13 @@ type AddTransactionDialogProps = {
   onStatus: (state: StatusState) => void;
 };
 
+type PreviewItem = {
+  name?: string;
+  qty?: number | string;
+  price?: number | string;
+  total?: number | string;
+};
+
 type ExpensePreviewData = {
   amount?: number;
   currency?: string;
@@ -786,7 +790,7 @@ type ExpensePreviewData = {
   purchase_date?: string;
   category?: string;
   notes?: string;
-  items?: Array<Record<string, unknown>>;
+  items?: PreviewItem[];
 };
 
 function AddTransactionDialog({

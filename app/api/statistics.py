@@ -602,6 +602,24 @@ def _resolve_category(expense: Expense, categories_meta: Dict[str, Dict[str, Cat
     by_id = categories_meta["by_id"]
     by_name = categories_meta["by_name"]
 
+    category_name_from_payload = _category_from_json(expense)
+    if category_name_from_payload:
+        mapped = by_name.get(category_name_from_payload.lower())
+        if mapped:
+            return (
+                str(mapped.id),
+                mapped.name,
+                mapped.color or _color_from_label(mapped.name),
+                mapped.icon or "tag",
+            )
+        key = f"name:{category_name_from_payload.lower()}"
+        return (
+            key,
+            category_name_from_payload,
+            _color_from_label(category_name_from_payload),
+            "tag",
+        )
+
     if expense.category_id:
         category = by_id.get(str(expense.category_id))
         if category:
@@ -615,24 +633,6 @@ def _resolve_category(expense: Expense, categories_meta: Dict[str, Dict[str, Cat
             str(expense.category_id),
             "Categorie necunoscută",
             "#94a3b8",
-            "tag",
-        )
-
-    category_name = _category_from_json(expense)
-    if category_name:
-        mapped = by_name.get(category_name.lower())
-        if mapped:
-            return (
-                str(mapped.id),
-                mapped.name,
-                mapped.color or _color_from_label(mapped.name),
-                mapped.icon or "tag",
-            )
-        key = f"name:{category_name.lower()}"
-        return (
-            key,
-            category_name,
-            _color_from_label(category_name),
             "tag",
         )
 

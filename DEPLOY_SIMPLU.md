@@ -27,6 +27,9 @@ Completează:
 GROQAPIKEY=your-groq-key
 telegramToken=your-telegram-token
 DOMAIN=api.example.com         # ⚠️ IMPORTANT!
+WEB_DOMAIN=app.example.com     # Domeniul pe care rulează interfața web
+NEXT_PUBLIC_API_URL=https://api.example.com
+API_BASE_URL=http://app:8000
 SSL_EMAIL=your-email@gmail.com  # ⚠️ IMPORTANT!
 ENCRYPTION_KEY=generate-random-32-chars
 ```

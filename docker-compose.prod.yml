@@ -1,39 +1,9 @@
 services:
-  # Nginx Reverse Proxy with SSL
-  nginx:
-    image: nginx:alpine
-    container_name: expense-bot-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/letsencrypt:ro
-      - ./nginx/certbot-www:/var/www/certbot:ro
-    environment:
-      - DOMAIN=${DOMAIN}
-    depends_on:
-      - app
-    restart: always
-    networks:
-      - expense-bot-network
-
-  # Certbot for SSL certificates
-  certbot:
-    image: certbot/certbot
-    container_name: expense-bot-certbot
-    volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-      - ./nginx/certbot-www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    restart: always
-
-  # FastAPI Application
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      target: production  # Production target
+      target: production
       args:
         PYTHON_VERSION: 3.11
         APP_PORT: 8000
@@ -56,11 +26,42 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: "2"
           memory: 2G
         reservations:
-          cpus: '1'
+          cpus: "1"
           memory: 512M
+
+  web:
+    build:
+      context: ./expense-web
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        API_BASE_URL: ${API_BASE_URL:-http://app:8000}
+    container_name: expense-bot-web-prod
+    env_file:
+      - .env
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      API_BASE_URL: ${API_BASE_URL:-http://app:8000}
+    depends_on:
+      app:
+        condition: service_started
+    expose:
+      - "3000"
+    restart: always
+    networks:
+      - expense-bot-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
 
   db:
     image: postgres:15-alpine
@@ -86,7 +87,7 @@ services:
     image: redis:7-alpine
     container_name: expense-bot-redis-prod
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -94,6 +95,42 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    restart: always
+    networks:
+      - expense-bot-network
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: expense-bot-nginx
+    depends_on:
+      app:
+        condition: service_started
+      web:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./nginx/ssl:/etc/letsencrypt:ro
+      - ./nginx/certbot-www:/var/www/certbot
+    environment:
+      DOMAIN: ${DOMAIN}
+      WEB_DOMAIN: ${WEB_DOMAIN}
+    command: >-
+      /bin/sh -c "envsubst '$$DOMAIN $$WEB_DOMAIN' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+      && exec nginx -g 'daemon off;'"
+    restart: always
+    networks:
+      - expense-bot-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: expense-bot-certbot
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/certbot-www:/var/www/certbot
+    entrypoint: ["tail", "-f", "/dev/null"]
     restart: always
     networks:
       - expense-bot-network

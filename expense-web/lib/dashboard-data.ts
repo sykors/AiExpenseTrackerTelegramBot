@@ -256,20 +256,34 @@ type DashboardFilters = {
 
 const DEFAULT_TREND_RANGE = 10;
 const MAX_TREND_RANGE = 180;
+const MIN_TREND_RANGE = 2;
 
-function computeTrendRange(filters?: DashboardFilters) {
-  if (filters?.dateFrom && filters?.dateTo) {
-    const start = new Date(filters.dateFrom);
-    const end = new Date(filters.dateTo);
+function computeTrendRange(
+  filters?: DashboardFilters,
+  fallbackStart?: string,
+  fallbackEnd?: string
+) {
+  const hasExplicitRange = Boolean(filters?.dateFrom || filters?.dateTo);
+  const startDate = filters?.dateFrom ?? fallbackStart;
+  const endDate = filters?.dateTo ?? fallbackEnd;
+
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
     const diff =
       Math.floor(
         (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
       ) + 1;
     if (Number.isFinite(diff) && diff > 0) {
-      return Math.min(diff, MAX_TREND_RANGE);
+      const clamped = Math.min(diff, MAX_TREND_RANGE);
+      if (hasExplicitRange) {
+        return Math.max(MIN_TREND_RANGE, clamped);
+      }
+      return Math.max(DEFAULT_TREND_RANGE, Math.max(MIN_TREND_RANGE, clamped));
     }
   }
-  return DEFAULT_TREND_RANGE;
+
+  return hasExplicitRange ? MIN_TREND_RANGE : DEFAULT_TREND_RANGE;
 }
 
 export async function getDashboardData(
@@ -280,20 +294,32 @@ export async function getDashboardData(
     date_to: filters?.dateTo,
   };
 
-  const expensesResponse = await fetchJson<ExpenseListResponse>(
-    buildPath("/api/v1/expenses", {
-      limit: 5,
-      sort_by: "purchase_date",
-      order: "desc",
-      ...dateFilter,
-    })
-  );
+  const [recentExpensesResponse, earliestExpenseResponse] = await Promise.all([
+    fetchJson<ExpenseListResponse>(
+      buildPath("/api/v1/expenses", {
+        limit: 5,
+        sort_by: "purchase_date",
+        order: "desc",
+        ...dateFilter,
+      })
+    ),
+    filters?.dateFrom || filters?.dateTo
+      ? Promise.resolve(null)
+      : fetchJson<ExpenseListResponse>(
+          "/api/v1/expenses?limit=1&sort_by=purchase_date&order=asc"
+        ),
+  ]);
 
-  const recentExpenses = normalizeExpenses(expensesResponse);
+  const recentExpenses = normalizeExpenses(recentExpensesResponse);
   const targetDate =
-    extractDate(expensesResponse?.expenses?.[0]?.purchase_date) ??
-    extractDate(expensesResponse?.expenses?.[0]?.created_at) ??
+    extractDate(recentExpensesResponse?.expenses?.[0]?.purchase_date) ??
+    extractDate(recentExpensesResponse?.expenses?.[0]?.created_at) ??
     null;
+  const earliestDate =
+    filters?.dateFrom ??
+    extractDate(earliestExpenseResponse?.expenses?.[0]?.purchase_date) ??
+    extractDate(earliestExpenseResponse?.expenses?.[0]?.created_at) ??
+    targetDate;
 
   const summaryParams = {
     ...(targetDate ? { target_date: targetDate } : {}),
@@ -310,10 +336,11 @@ export async function getDashboardData(
       ? { ...dateFilter, limit: 5 }
       : { period: "all", limit: 5 };
 
-  const trendRange = computeTrendRange(filters);
+  const trendRange = computeTrendRange(filters, earliestDate, filters?.dateTo ?? targetDate ?? undefined);
   const trendParams = {
     trend_type: "daily",
     range_value: trendRange,
+    ...(targetDate ? { target_date: targetDate } : {}),
     ...dateFilter,
   };
 

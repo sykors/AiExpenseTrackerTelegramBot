@@ -49,7 +49,17 @@ GROQ_API_KEY=your_groq_api_key_here
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 ENCRYPTION_KEY=your_base64_encoded_32_byte_key
 JWT_SECRET_KEY=your_jwt_secret_key
+DOMAIN=api.example.com
+WEB_DOMAIN=app.example.com
+NEXT_PUBLIC_API_URL=https://api.example.com
+API_BASE_URL=http://app:8000
 ```
+
+- `DOMAIN` is the domain that points to the FastAPI service (used by Nginx/SSL).
+- `WEB_DOMAIN` is the public hostname for the Next.js UI.
+- `NEXT_PUBLIC_API_URL` is what the browser uses when calling the API.
+- `API_BASE_URL` is the internal URL that the Next.js server components use when running inside Docker (defaults to `http://app:8000`).
+- For a detailed description of every variable see [`ENVIRONMENT.md`](ENVIRONMENT.md).
 
 3. **Start the application**
 ```bash

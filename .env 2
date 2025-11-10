@@ -1,0 +1,43 @@
+# ===================================
+# Environment Configuration
+# ===================================
+
+# AI Service
+GROQAPIKEY=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
+GROQ_API_KEY=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
+
+# Telegram Bot
+telegramToken=8260315731:AAHmndoA83ipjp373bH4dFT0uNqtMIvNLCk
+TELEGRAM_BOT_TOKEN=8260315731:AAHmndoA83ipjp373bH4dFT0uNqtMIvNLCk
+
+# Access Control - DOAR grupul tău
+ALLOWED_GROUP_ID=-5028155280
+# Opțional: adaugă user IDs individuali care pot folosi bot-ul (tu și soția ta)
+# Format: user_id1,user_id2
+ALLOWED_USER_IDS=
+
+# Database Configuration
+DATABASE_URL=postgresql://expenseuser:expensepass@db:5432/expensebot
+DB_USER=expenseuser
+DB_PASSWORD=expensepass
+DB_NAME=expensebot
+
+# Redis
+REDIS_URL=redis://redis:6379
+
+# Encryption (generated base64 key)
+ENCRYPTION_KEY=qmzrIfSgZoNlNJNaPz7ZCOpzCBvIzOssgstGyVY9/+A=
+JWT_SECRET_KEY=hqsN9WYAvuZQY2bshvkclkoujq3PelCmgau8WFqG_6U
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_HOURS=24
+
+# Server Configuration (IMPORTANT: Set your domain here!)
+DOMAIN=api.yourdomain.com
+SERVER_IP=your.server.ip.here
+
+# SSL/HTTPS (for automatic SSL certificate)
+SSL_EMAIL=your-email@domain.com
+
+# Application
+APP_PORT=8000
+LOG_LEVEL=info

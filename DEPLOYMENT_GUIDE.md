@@ -79,6 +79,9 @@ JWT_EXPIRATION_HOURS=24
 
 # IMPORTANT: Domeniile tale!
 DOMAIN=api.example.com
+WEB_DOMAIN=app.example.com
+NEXT_PUBLIC_API_URL=https://api.example.com
+API_BASE_URL=http://app:8000
 SERVER_IP=123.45.67.89
 SSL_EMAIL=your-email@example.com
 
@@ -123,10 +126,11 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml ps
 
 # Trebuie să vezi toate serviciile UP:
-# - nginx
-# - certbot
-# - app
-# - db
+# - nginx (reverse proxy)
+# - certbot (pentru renew)
+# - web (Next.js)
+# - app (FastAPI)
+# - db (PostgreSQL)
 # - redis
 ```
 
@@ -159,6 +163,7 @@ docker-compose -f docker-compose.prod.yml logs -f nginx
 ## Endpoints Disponibile
 
 ### Public URLs
+- **Web UI**: `https://app.example.com/`
 - **API Root**: `https://api.example.com/`
 - **Health Check**: `https://api.example.com/health`
 - **API Docs**: `https://api.example.com/docs`

@@ -81,7 +81,7 @@ telegramToken=your-token
 - **SSL certificate**: Generează certificat pentru domeniul specific
 - **Redirect HTTPS**: Force SSL pentru tot traficul
 
-**Nginx Config** (`nginx/nginx.conf`):
+**Nginx Config** (`nginx/nginx.conf.template`):
 ```nginx
 server {
     listen 443 ssl http2;
@@ -190,7 +190,7 @@ TelegramBotAI/
 │           └── DOMAIN=${DOMAIN}
 │
 ├── nginx/
-│   ├── nginx.conf            # ← Template cu ${DOMAIN}
+│   ├── nginx.conf.template   # ← Template cu ${DOMAIN} și ${WEB_DOMAIN}
 │   ├── ssl/                  # ← Certificatele SSL (auto-generate)
 │   └── certbot-www/          # ← Let's Encrypt validation
 │
@@ -314,7 +314,7 @@ certbot certonly \
 
 ### ✅ Checklist
 - [ ] DNS configurat corect
-- [ ] SSL certificate valid (auto-renew)
+- [ ] SSL certificate renewed în ultimele 90 de zile (`make ssl-renew`)
 - [ ] Force HTTPS (redirect HTTP → HTTPS)
 - [ ] Security headers în Nginx
 - [ ] Rate limiting activat

@@ -26,6 +26,15 @@ export default async function Home({ searchParams }: PageProps) {
     dateTo,
   });
 
+  const filterRangeLabel =
+    dateFrom && dateTo
+      ? `${dateFrom} → ${dateTo}`
+      : dateFrom
+      ? `De la ${dateFrom}`
+      : dateTo
+      ? `Până la ${dateTo}`
+      : undefined;
+
   return (
     <DashboardShell>
       <div className="space-y-6">
@@ -36,11 +45,20 @@ export default async function Home({ searchParams }: PageProps) {
           <TrendCard
             trend={dashboardData.trend}
             summary={dashboardData.summary}
+            rangeLabel={
+              filterRangeLabel ??
+              (dashboardData.trend.length > 1
+                ? `${dashboardData.trend[0].label} → ${
+                    dashboardData.trend[dashboardData.trend.length - 1].label
+                  }`
+                : undefined)
+            }
           />
           <SummaryCards
             summary={dashboardData.summary}
             variant="stacked"
             className="h-full"
+            rangeLabel={filterRangeLabel}
           />
         </div>
 

@@ -65,9 +65,12 @@ TelegramBotAI/
 ├── 🔍 verify_docker.sh              # Verificare setup
 │
 ├── 📂 nginx/
-│   ├── nginx.conf                   # Nginx config (reverse proxy)
+│   ├── nginx.conf.template          # Template folosit de containerul Nginx
 │   ├── ssl/                         # SSL certificates (auto-generate)
 │   └── certbot-www/                 # Let's Encrypt validation
+│
+├── 📂 expense-web/                  # Next.js frontend (buildat și rulat din Docker)
+│   └── Dockerfile                   # Dev + Prod targets
 │
 ├── 📂 app/
 │   ├── main.py                      # FastAPI application
@@ -159,6 +162,9 @@ telegramToken=your-telegram-token
 
 # Domain & SSL (IMPORTANT pentru production!)
 DOMAIN=api.example.com
+WEB_DOMAIN=app.example.com
+NEXT_PUBLIC_API_URL=https://api.example.com
+API_BASE_URL=http://app:8000
 SSL_EMAIL=your-email@gmail.com
 
 # Database (schimbă passwords!)
@@ -182,7 +188,7 @@ openssl rand -base64 32
 ### Ce include:
 ✅ Multi-stage Dockerfile (development + production)
 ✅ Nginx reverse proxy cu SSL automat
-✅ Let's Encrypt SSL certificates (auto-renew)
+✅ Let's Encrypt SSL certificates (renew with `make ssl-renew`)
 ✅ PostgreSQL database
 ✅ Redis cache
 ✅ Health checks
@@ -385,7 +391,7 @@ După deployment:
 ✅ **Dockerfile complet** cu multi-stage build
 ✅ **Docker Compose** pentru development și production
 ✅ **Nginx** reverse proxy cu SSL automat
-✅ **Let's Encrypt** SSL certificates cu auto-renewal
+✅ **Let's Encrypt** SSL certificates (rulezi `make ssl-renew` pentru renew)
 ✅ **Scripts** pentru setup și deployment automat
 ✅ **Makefile** cu comenzi rapide
 ✅ **Documentație completă** pentru toate scenariile
