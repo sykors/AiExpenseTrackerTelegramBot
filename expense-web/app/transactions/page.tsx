@@ -7,6 +7,9 @@ import type {
   ExpenseResponse,
 } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getTransactionsData(): Promise<{
   expenses: ExpenseResponse[];
   categories: CategoryResponse[];

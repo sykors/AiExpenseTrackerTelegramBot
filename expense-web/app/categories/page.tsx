@@ -6,6 +6,9 @@ import type {
   CategoryBreakdown,
 } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getCategoriesData() {
   const [categories, stats] = await Promise.all([
     serverFetch<CategoryResponse[]>("/api/v1/categories"),

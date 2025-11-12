@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { CategoryBreakdownCard } from "@/components/dashboard/CategoryBreakdownCard";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { RecentExpensesTable } from "@/components/dashboard/RecentExpensesTable";
@@ -10,6 +11,9 @@ import { getDashboardData } from "@/lib/dashboard-data";
 type PageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function Home({ searchParams }: PageProps) {
   const dateFrom =
@@ -38,7 +42,9 @@ export default async function Home({ searchParams }: PageProps) {
   return (
     <DashboardShell>
       <div className="space-y-6">
-        <DashboardFilters dateFrom={dateFrom} dateTo={dateTo} />
+        <Suspense fallback={<div className="rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">Se încarcă filtrele...</div>}>
+          <DashboardFilters dateFrom={dateFrom} dateTo={dateTo} />
+        </Suspense>
         <CategoryBreakdownCard categories={dashboardData.categories} />
 
         <div className="grid gap-6 xl:grid-cols-[2fr_1fr] xl:items-stretch">
