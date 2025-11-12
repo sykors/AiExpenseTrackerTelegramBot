@@ -43,6 +43,8 @@ if [ -z "$WEB_DOMAIN" ]; then
     export WEB_DOMAIN
 fi
 
+INCLUDE_WWW_VARIANTS="${INCLUDE_WWW_VARIANTS:-true}"
+
 echo -e "${GREEN}Domain: $DOMAIN${NC}"
 echo -e "${GREEN}Web Domain: $WEB_DOMAIN${NC}"
 echo -e "${GREEN}Email: $SSL_EMAIL${NC}"
@@ -110,10 +112,15 @@ CERTBOT_DOMAINS=$(python3 - <<'PY'
 import os
 domains = []
 raw = os.environ["DOMAIN"].strip()
-domains.extend([raw, f"www.{raw}"])
+include_www = os.environ.get("INCLUDE_WWW_VARIANTS", "true").lower() not in ("false", "0", "no", "off")
+domains.append(raw)
+if include_www:
+    domains.append(f"www.{raw}")
 web = os.environ.get("WEB_DOMAIN", "").strip()
 if web and web != raw:
-    domains.extend([web, f"www.{web}"])
+    domains.append(web)
+    if include_www:
+        domains.append(f"www.{web}")
 seen = []
 for host in domains:
     if host and host not in seen:

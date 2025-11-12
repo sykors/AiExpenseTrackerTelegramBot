@@ -9,6 +9,30 @@ fi
 FASTAPI_UPSTREAM="app:8000"
 WEB_UPSTREAM="web:3000"
 ACTUAL_WEB_DOMAIN="${WEB_DOMAIN:-$DOMAIN}"
+INCLUDE_WWW_VARIANTS="${INCLUDE_WWW_VARIANTS:-true}"
+
+should_include_www() {
+    case "$(printf "%s" "$INCLUDE_WWW_VARIANTS" | tr '[:upper:]' '[:lower:]')" in
+        ""|"true"|"1"|"yes"|"on")
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+build_server_names() {
+    local base="$1"
+    if should_include_www; then
+        printf "%s www.%s" "$base" "$base"
+    else
+        printf "%s" "$base"
+    fi
+}
+
+API_SERVER_NAMES="$(build_server_names "$DOMAIN")"
+WEB_SERVER_NAMES="$(build_server_names "$ACTUAL_WEB_DOMAIN")"
 
 generate_single_domain() {
     cat <<EOF
@@ -37,7 +61,7 @@ http {
     server {
         listen 80;
         listen [::]:80;
-        server_name ${DOMAIN} www.${DOMAIN};
+        server_name ${API_SERVER_NAMES};
 
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
@@ -51,7 +75,7 @@ http {
     server {
         listen 443 ssl http2;
         listen [::]:443 ssl http2;
-        server_name ${DOMAIN} www.${DOMAIN};
+        server_name ${API_SERVER_NAMES};
 
         ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
@@ -141,7 +165,7 @@ http {
     server {
         listen 80;
         listen [::]:80;
-        server_name ${DOMAIN} www.${DOMAIN};
+        server_name ${API_SERVER_NAMES};
 
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
@@ -211,7 +235,7 @@ http {
     server {
         listen 80;
         listen [::]:80;
-        server_name ${ACTUAL_WEB_DOMAIN} www.${ACTUAL_WEB_DOMAIN};
+        server_name ${WEB_SERVER_NAMES};
 
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
@@ -225,7 +249,7 @@ http {
     server {
         listen 443 ssl http2;
         listen [::]:443 ssl http2;
-        server_name ${ACTUAL_WEB_DOMAIN} www.${ACTUAL_WEB_DOMAIN};
+        server_name ${WEB_SERVER_NAMES};
 
         ssl_certificate /etc/letsencrypt/live/${ACTUAL_WEB_DOMAIN}/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/${ACTUAL_WEB_DOMAIN}/privkey.pem;

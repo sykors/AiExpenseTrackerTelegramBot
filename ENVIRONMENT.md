@@ -20,6 +20,7 @@ Rulează `./scripts/bootstrap_env.sh` pentru un wizard interactiv care îți gen
 | `NEXT_PUBLIC_API_URL` | ✅ | Next.js (client) | Browser calls hit this URL (implicit `https://<DOMAIN>/api`) |
 | `API_BASE_URL` | ✅ | Next.js (server) | Server components call the API through this URL (`http://app:8000` when everything runs in Docker) |
 | `SSL_EMAIL` | ✅ (production) | `setup-ssl.sh` | Used by Let's Encrypt when issuing certificates |
+| `INCLUDE_WWW_VARIANTS` | optional | Nginx + SSL | `true` by default; set to `false` dacă nu ai record `www.` în DNS |
 
 ## Service-specific variables
 
@@ -46,6 +47,7 @@ Rulează `./scripts/bootstrap_env.sh` pentru un wizard interactiv care îți gen
 - `NEXT_PUBLIC_API_URL`: URL-ul public pe care îl folosește browserul (`https://domain.com/api` by default).
 - `API_BASE_URL`: URL that the Next.js server components use. In Docker keep it internal: `http://app:8000`.
 - `ADDITIONAL_CORS_ORIGINS`: comma-separated list of extra origins if you expose more frontends.
+- `INCLUDE_WWW_VARIANTS`: pune `false` dacă nu vrei să generezi automat certificate și config pentru `www.<domeniu>`.
 
 ### Miscellaneous
 - `APP_PORT`: defaults to `8000`.
