@@ -14,7 +14,7 @@ TTL: 3600
 ```
 
 **Exemplu**:
-- Domeniu: `api.example.com`
+- Domeniu: `example.com`
 - IP Server: `123.45.67.89`
 
 Așteaptă 5-10 minute pentru propagarea DNS.
@@ -22,7 +22,7 @@ Așteaptă 5-10 minute pentru propagarea DNS.
 #### 2. Verifică DNS
 ```bash
 # Pe computerul tău
-ping api.example.com
+ping example.com
 
 # Trebuie să returneze IP-ul serverului
 ```
@@ -52,6 +52,7 @@ cp .env.example .env
 
 # Editează .env
 nano .env
+# (sau rulează wizard-ul interactiv: ./scripts/bootstrap_env.sh)
 ```
 
 **Completează următoarele**:
@@ -78,9 +79,9 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRATION_HOURS=24
 
 # IMPORTANT: Domeniile tale!
-DOMAIN=api.example.com
-WEB_DOMAIN=app.example.com
-NEXT_PUBLIC_API_URL=https://api.example.com
+DOMAIN=example.com
+WEB_DOMAIN=example.com
+NEXT_PUBLIC_API_URL=https://example.com/api
 API_BASE_URL=http://app:8000
 SERVER_IP=123.45.67.89
 SSL_EMAIL=your-email@example.com
@@ -114,7 +115,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-**Gata! API-ul rulează pe**: `https://api.example.com`
+**Gata! API-ul rulează pe**: `https://example.com/api`
 
 ---
 
@@ -140,7 +141,7 @@ docker-compose -f docker-compose.prod.yml ps
 curl http://localhost:8000/health
 
 # Public cu SSL
-curl https://api.example.com/health
+curl https://example.com/health
 
 # Expected response:
 # {"status":"healthy"}
@@ -164,10 +165,10 @@ docker-compose -f docker-compose.prod.yml logs -f nginx
 
 ### Public URLs
 - **Web UI**: `https://app.example.com/`
-- **API Root**: `https://api.example.com/`
-- **Health Check**: `https://api.example.com/health`
-- **API Docs**: `https://api.example.com/docs`
-- **ReDoc**: `https://api.example.com/redoc`
+- **API Root**: `https://example.com/`
+- **Health Check**: `https://example.com/health`
+- **API Docs**: `https://example.com/docs`
+- **ReDoc**: `https://example.com/redoc`
 
 ### API Routes
 - `POST /api/v1/expenses/photo` - Upload receipt photo
@@ -261,7 +262,7 @@ docker-compose -f docker-compose.prod.yml restart nginx
 
 ### Check Certificate Expiration
 ```bash
-echo | openssl s_client -servername api.example.com -connect api.example.com:443 2>/dev/null | openssl x509 -noout -dates
+echo | openssl s_client -servername example.com -connect example.com:443 2>/dev/null | openssl x509 -noout -dates
 ```
 
 ---
@@ -271,10 +272,10 @@ echo | openssl s_client -servername api.example.com -connect api.example.com:443
 ### Problema: SSL Certificate Failed
 ```bash
 # Check DNS
-dig api.example.com
+dig example.com
 
 # Verify port 80 is open
-curl http://api.example.com/.well-known/acme-challenge/test
+curl http://example.com/.well-known/acme-challenge/test
 
 # Re-run SSL setup
 ./setup-ssl.sh
@@ -409,7 +410,7 @@ docker-compose -f docker-compose.prod.yml exec db psql -U expenseuser expensebot
 docker-compose -f docker-compose.prod.yml exec redis redis-cli
 
 # Health check
-curl https://api.example.com/health
+curl https://example.com/health
 ```
 
 ---
@@ -436,7 +437,7 @@ curl https://api.example.com/health
 
 **Verificare**:
 ```bash
-curl https://api.example.com/health
+curl https://example.com/health
 ```
 
 **Gata! API-ul rulează cu SSL automat pe domeniul tău! 🚀**

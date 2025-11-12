@@ -35,8 +35,10 @@
 git clone <repo> && cd TelegramBotAI
 cp .env.example .env && nano .env
 
-# 2. Configurează .env
-DOMAIN=api.example.com
+# 2. Configurează .env (sau rulează ./scripts/bootstrap_env.sh)
+DOMAIN=example.com
+WEB_DOMAIN=example.com
+NEXT_PUBLIC_API_URL=https://example.com/api
 SSL_EMAIL=your-email@gmail.com
 GROQAPIKEY=your-key
 telegramToken=your-token
@@ -45,7 +47,7 @@ telegramToken=your-token
 ./setup-ssl.sh && make prod
 ```
 
-**Gata!** API-ul rulează pe: `https://api.example.com`
+**Gata!** API-ul rulează pe: `https://example.com/api`
 
 ---
 
@@ -65,12 +67,15 @@ TelegramBotAI/
 ├── 🔍 verify_docker.sh              # Verificare setup
 │
 ├── 📂 nginx/
-│   ├── nginx.conf.template          # Template folosit de containerul Nginx
+│   ├── start-nginx.sh               # Script care generează config în funcție de domenii
 │   ├── ssl/                         # SSL certificates (auto-generate)
 │   └── certbot-www/                 # Let's Encrypt validation
 │
 ├── 📂 expense-web/                  # Next.js frontend (buildat și rulat din Docker)
 │   └── Dockerfile                   # Dev + Prod targets
+│
+├── 📂 scripts/
+│   └── bootstrap_env.sh             # Wizard pentru generarea rapidă a fișierului .env
 │
 ├── 📂 app/
 │   ├── main.py                      # FastAPI application
@@ -129,7 +134,7 @@ TelegramBotAI/
 **Citește**: [DOMAIN_SSL_SETUP.md](DOMAIN_SSL_SETUP.md)
 
 **Răspuns rapid**:
-- **Domeniu**: Se configurează în `.env` → `DOMAIN=api.example.com`
+- **Domeniu**: Se configurează în `.env` → `DOMAIN=example.com` (poate fi și `app.example.com` dacă vrei subdomeniu)
 - **SSL**: Automat prin `./setup-ssl.sh`
 
 ---
@@ -161,9 +166,9 @@ GROQAPIKEY=your-groq-key
 telegramToken=your-telegram-token
 
 # Domain & SSL (IMPORTANT pentru production!)
-DOMAIN=api.example.com
-WEB_DOMAIN=app.example.com
-NEXT_PUBLIC_API_URL=https://api.example.com
+DOMAIN=example.com
+WEB_DOMAIN=example.com            # sau app.example.com dacă vrei UI separat
+NEXT_PUBLIC_API_URL=https://example.com/api
 API_BASE_URL=http://app:8000
 SSL_EMAIL=your-email@gmail.com
 
@@ -291,10 +296,10 @@ make backup-db  # Backup database
 După deployment, API-ul e disponibil la:
 
 ### Public URLs
-- **Root**: `https://api.example.com/`
-- **Health**: `https://api.example.com/health`
-- **Docs**: `https://api.example.com/docs`
-- **ReDoc**: `https://api.example.com/redoc`
+- **Root**: `https://example.com/`
+- **Health**: `https://example.com/health`
+- **Docs**: `https://example.com/docs`
+- **ReDoc**: `https://example.com/redoc`
 
 ### API Routes
 - `POST /api/v1/expenses/photo` - Upload receipt photo
@@ -315,7 +320,7 @@ După deployment, API-ul e disponibil la:
 curl http://localhost:8000/health
 
 # Production
-curl https://api.example.com/health
+curl https://example.com/health
 ```
 
 ### View Logs
@@ -377,7 +382,7 @@ docker-compose -f docker-compose.prod.yml up -d
 
 După deployment:
 
-1. **Test API**: `curl https://api.example.com/health`
+1. **Test API**: `curl https://example.com/health`
 2. **Configurează Telegram Bot**: Link bot cu API-ul
 3. **Setup Monitoring**: Logs, alerts, metrics
 4. **Backup Strategy**: Automate database backups
@@ -405,7 +410,7 @@ cp .env.example .env && nano .env  # Set DOMAIN & keys
 
 ### Verificare:
 ```bash
-curl https://api.example.com/health
+curl https://example.com/health
 # {"status":"healthy"}
 ```
 

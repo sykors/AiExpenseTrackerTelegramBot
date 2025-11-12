@@ -40,6 +40,7 @@ cd TelegramBotAI
 2. **Configure environment variables**
 ```bash
 cp .env.example .env
+# sau rulează wizard-ul: ./scripts/bootstrap_env.sh
 ```
 
 Edit `.env` and add your credentials:
@@ -49,15 +50,15 @@ GROQ_API_KEY=your_groq_api_key_here
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 ENCRYPTION_KEY=your_base64_encoded_32_byte_key
 JWT_SECRET_KEY=your_jwt_secret_key
-DOMAIN=api.example.com
-WEB_DOMAIN=app.example.com
-NEXT_PUBLIC_API_URL=https://api.example.com
+DOMAIN=example.com
+WEB_DOMAIN=example.com
+NEXT_PUBLIC_API_URL=https://example.com/api
 API_BASE_URL=http://app:8000
 ```
 
-- `DOMAIN` is the domain that points to the FastAPI service (used by Nginx/SSL).
-- `WEB_DOMAIN` is the public hostname for the Next.js UI.
-- `NEXT_PUBLIC_API_URL` is what the browser uses when calling the API.
+- `DOMAIN` este domeniul care pointează spre server (FastAPI + Next.js).
+- `WEB_DOMAIN` poate fi același cu `DOMAIN` (totul pe un singur host) sau un subdomeniu separat pentru UI.
+- `NEXT_PUBLIC_API_URL` este URL-ul public folosit de browser (implicit `https://DOMAIN/api`).
 - `API_BASE_URL` is the internal URL that the Next.js server components use when running inside Docker (defaults to `http://app:8000`).
 - For a detailed description of every variable see [`ENVIRONMENT.md`](ENVIRONMENT.md).
 

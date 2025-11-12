@@ -7,15 +7,16 @@
 Domenul se configurează în **un singur loc**: fișierul `.env`
 
 ```env
-DOMAIN=api.example.com
+DOMAIN=example.com
 SSL_EMAIL=your-email@gmail.com
+WEB_DOMAIN=example.com        # sau un subdomeniu separat pentru UI
 ```
 
 ### 🔄 Cum funcționează fluxul complet?
 
 ```
-User Request → Domain (DNS) → Server IP → Nginx (Port 443) → FastAPI (Port 8000)
-             https://api.example.com            SSL/HTTPS         Your App
+User Request → Domain (DNS) → Server IP → Nginx (Port 443) → FastAPI/Next.js
+             https://example.com                SSL/HTTPS         Your App
 ```
 
 ---
@@ -28,16 +29,16 @@ User Request → Domain (DNS) → Server IP → Nginx (Port 443) → FastAPI (Po
 
 ```
 Type: A
-Name: api (sau @ pentru root domain)
+Name: @      (sau api dacă vrei subdomeniu)
 Value: 123.45.67.89 (IP-ul serverului tău)
 TTL: 3600
 ```
 
 **Exemplu**:
-- Vrei: `api.example.com`
+- Vrei scenariul simplu → `example.com`
 - DNS Record:
   - Type: `A`
-  - Name: `api`
+  - Name: `@`
   - Value: `123.45.67.89`
 
 **Așteaptă 5-10 minute** pentru propagare DNS.
@@ -45,7 +46,7 @@ TTL: 3600
 **Verificare DNS**:
 ```bash
 # Pe computerul tău
-ping api.example.com
+ping example.com
 # Trebuie să returneze IP-ul serverului
 ```
 
@@ -62,7 +63,7 @@ nano .env
 **Adaugă/modifică**:
 ```env
 # Server Configuration
-DOMAIN=api.example.com          # Domenul tău exact!
+DOMAIN=example.com              # Domeniul tău exact!
 SERVER_IP=123.45.67.89           # IP-ul serverului
 SSL_EMAIL=your-email@gmail.com   # Email pentru Let's Encrypt
 
@@ -76,22 +77,23 @@ telegramToken=your-token
 
 ### 3. Cum se folosește DOMAIN în sistem?
 
-#### A. Nginx folosește DOMAIN pentru:
-- **Virtual host**: Recunoaște request-urile pentru domeniul tău
-- **SSL certificate**: Generează certificat pentru domeniul specific
-- **Redirect HTTPS**: Force SSL pentru tot traficul
+#### A. Nginx (`nginx/start-nginx.sh`) folosește DOMAIN pentru:
+- **Virtual host**: știe pe ce domeniu să răspundă.
+- **SSL**: încarcă certificatele emise de Let's Encrypt pentru acel domeniu.
+- **Routing**: direcționează `/api/*` către FastAPI și restul către Next.js (dacă folosești un singur domeniu). Dacă `WEB_DOMAIN` este diferit, scriptul generează două server blocks separate.
 
-**Nginx Config** (`nginx/nginx.conf.template`):
+Fragment din config-ul generat automat (scenariul „totul pe același domeniu”):
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name ${DOMAIN} www.${DOMAIN};  # ← Aici se folosește DOMAIN
+    server_name example.com www.example.com;
 
-    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    location ^~ /api/ {
+        proxy_pass http://app:8000$request_uri;
+    }
 
     location / {
-        proxy_pass http://app:8000;  # ← Redirect către FastAPI
+        proxy_pass http://web:3000;
     }
 }
 ```
@@ -115,20 +117,20 @@ certbot certonly \
 
 ### 1. User accesează API-ul
 ```
-User browser → https://api.example.com/api/v1/expenses
+User browser → https://example.com/api/v1/expenses
 ```
 
 ### 2. DNS Resolution
 ```
-api.example.com → 123.45.67.89 (server IP)
+example.com → 123.45.67.89 (server IP)
 ```
 
 ### 3. Nginx primește request-ul
 ```
-Port 443 (HTTPS) → Nginx Container
-- Verifică SSL certificate pentru api.example.com
+Port 443 (HTTPS) → containerul Nginx
+- Verifică certificatul pentru example.com
 - Decryptează conexiunea SSL
-- Forward către FastAPI
+- Trimite /api/* către FastAPI și restul către Next.js
 ```
 
 ### 4. FastAPI procesează request-ul
@@ -166,13 +168,13 @@ make prod
 ### Verificare
 ```bash
 # Check DNS
-ping api.example.com
+ping example.com
 
 # Check SSL certificate
 make ssl-check
 
 # Check API health
-curl https://api.example.com/health
+curl https://example.com/health
 ```
 
 ---
@@ -182,7 +184,7 @@ curl https://api.example.com/health
 ```
 TelegramBotAI/
 ├── .env                      # ← DOMAIN se configurează aici!
-│   └── DOMAIN=api.example.com
+│   └── DOMAIN=example.com
 │
 ├── docker-compose.prod.yml   # ← Nginx folosește ${DOMAIN} din .env
 │   └── nginx service
@@ -190,7 +192,7 @@ TelegramBotAI/
 │           └── DOMAIN=${DOMAIN}
 │
 ├── nginx/
-│   ├── nginx.conf.template   # ← Template cu ${DOMAIN} și ${WEB_DOMAIN}
+│   ├── start-nginx.sh        # ← Generează config în funcție de DOMAIN / WEB_DOMAIN
 │   ├── ssl/                  # ← Certificatele SSL (auto-generate)
 │   └── certbot-www/          # ← Let's Encrypt validation
 │
@@ -201,29 +203,31 @@ TelegramBotAI/
 
 ## Exemple Concrete
 
-### Exemplu 1: API Domain
-```env
-# .env
-DOMAIN=api.mycompany.com
-SSL_EMAIL=admin@mycompany.com
-```
-
-**Rezultat**:
-- API disponibil la: `https://api.mycompany.com`
-- Docs la: `https://api.mycompany.com/docs`
-- SSL valid pentru: `api.mycompany.com` și `www.api.mycompany.com`
-
-### Exemplu 2: Root Domain
+### Exemplu 1: Un singur domeniu
 ```env
 # .env
 DOMAIN=mycompany.com
 SSL_EMAIL=admin@mycompany.com
+WEB_DOMAIN=mycompany.com
 ```
 
 **Rezultat**:
-- API la: `https://mycompany.com`
-- Docs la: `https://mycompany.com/docs`
-- SSL pentru: `mycompany.com` și `www.mycompany.com`
+- API disponibil la: `https://mycompany.com/api`
+- UI la: `https://mycompany.com`
+- SSL valid pentru: `mycompany.com` și `www.mycompany.com`
+
+### Exemplu 2: Domenii separate (API + Web)
+```env
+# .env
+DOMAIN=api.mycompany.com
+WEB_DOMAIN=app.mycompany.com
+SSL_EMAIL=admin@mycompany.com
+```
+
+**Rezultat**:
+- API la: `https://api.mycompany.com`
+- UI la: `https://app.mycompany.com`
+- SSL pentru fiecare domeniu specific
 
 ### Exemplu 3: Subdomain
 ```env
@@ -248,12 +252,12 @@ SSL_EMAIL=admin@mycompany.com
 
 **Fix**:
 ```bash
-# Verifică DNS
-dig api.example.com
-nslookup api.example.com
+# Verifică DNS (înlocuiește cu domeniul tău)
+dig example.com
+nslookup example.com
 
 # Verifică port 80
-curl http://api.example.com
+curl http://example.com
 
 # Verifică firewall
 sudo ufw status
@@ -328,7 +332,7 @@ certbot certonly \
 
 ### Configurare Domain
 ```env
-DOMAIN=api.example.com          # La provider DNS → A record → Server IP
+DOMAIN=example.com              # La provider DNS → A record → Server IP
 SSL_EMAIL=your-email@gmail.com  # Pentru Let's Encrypt notifications
 ```
 
@@ -340,7 +344,7 @@ make prod       # Start production cu SSL
 
 ### Verificare
 ```bash
-curl https://api.example.com/health  # Test HTTPS
+curl https://example.com/health      # Test HTTPS
 make ssl-check                        # Check certificate
 ```
 
@@ -360,7 +364,8 @@ make ssl-renew
 ### Unde se configurează domeniul?
 **Un singur loc**: `.env` file
 ```env
-DOMAIN=api.example.com
+DOMAIN=example.com
+WEB_DOMAIN=example.com
 ```
 
 ### Cum funcționează?

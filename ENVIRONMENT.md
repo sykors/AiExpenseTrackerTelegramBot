@@ -3,6 +3,10 @@
 Everything in this project is configured through `.env`.  
 Fill in the values once and both Docker Compose files (backend + Next.js web) will read them.
 
+## Setup rapid
+
+Rulează `./scripts/bootstrap_env.sh` pentru un wizard interactiv care îți generează `.env` (îți cere domeniul, email-ul SSL și cheile necesare).
+
 ## Minimal values you must set
 
 | Variable | Required | Used By | Why it matters |
@@ -12,8 +16,8 @@ Fill in the values once and both Docker Compose files (backend + Next.js web) wi
 | `ENCRYPTION_KEY` | ✅ | FastAPI | AES‑GCM encryption of sensitive columns (generate with `openssl rand -hex 32`) |
 | `JWT_SECRET_KEY` | ✅ | FastAPI | Issues session tokens for the web UI |
 | `DOMAIN` | ✅ | Nginx, SSL, web UI | Public hostname that will serve the API (ex: `api.example.com`) |
-| `WEB_DOMAIN` | ✅ | Nginx, web UI | Public hostname for the Next.js interface (ex: `app.example.com`) – must be different from `DOMAIN` |
-| `NEXT_PUBLIC_API_URL` | ✅ | Next.js (client) | Browser calls hit this URL (should be `https://<DOMAIN>`) |
+| `WEB_DOMAIN` | ✅ | Nginx, web UI | Public hostname for interfața Next.js – poate fi același cu `DOMAIN` dacă vrei totul pe un singur domeniu |
+| `NEXT_PUBLIC_API_URL` | ✅ | Next.js (client) | Browser calls hit this URL (implicit `https://<DOMAIN>/api`) |
 | `API_BASE_URL` | ✅ | Next.js (server) | Server components call the API through this URL (`http://app:8000` when everything runs in Docker) |
 | `SSL_EMAIL` | ✅ (production) | `setup-ssl.sh` | Used by Let's Encrypt when issuing certificates |
 
@@ -37,10 +41,9 @@ Fill in the values once and both Docker Compose files (backend + Next.js web) wi
 - `JWT_ALGORITHM`, `JWT_EXPIRATION_HOURS`: advanced overrides, defaults are fine.
 - `DEFAULT_USER_ID`: optional fixed UUID if you pre-create demo data.
 
-### Web + Domains
-- `DOMAIN`: API hostname. Requests to this domain are routed to FastAPI (port 8000) through Nginx.
-- `WEB_DOMAIN`: Web UI hostname. Requests to this domain are routed to the Next.js container (port 3000). Needs its own DNS record and SSL certificate.
-- `NEXT_PUBLIC_API_URL`: must match the public API URL that browsers can hit (`https://api.example.com`).
+- `DOMAIN`: hostname-ul public. Dacă `WEB_DOMAIN` nu este setat, și UI și API-ul folosesc același domeniu.
+- `WEB_DOMAIN`: seteaz-o doar dacă vrei UI-ul pe alt host (ex. `app.domain.com`). Lasă goală pentru același domeniu.
+- `NEXT_PUBLIC_API_URL`: URL-ul public pe care îl folosește browserul (`https://domain.com/api` by default).
 - `API_BASE_URL`: URL that the Next.js server components use. In Docker keep it internal: `http://app:8000`.
 - `ADDITIONAL_CORS_ORIGINS`: comma-separated list of extra origins if you expose more frontends.
 
@@ -53,9 +56,9 @@ Fill in the values once and both Docker Compose files (backend + Next.js web) wi
 
 ```env
 # 1. External domains + SSL
-DOMAIN=api.example.com
-WEB_DOMAIN=app.example.com
-NEXT_PUBLIC_API_URL=https://api.example.com
+DOMAIN=example.com
+WEB_DOMAIN=example.com          # sau app.example.com dacă vrei domeniu separat
+NEXT_PUBLIC_API_URL=https://example.com/api
 API_BASE_URL=http://app:8000
 SSL_EMAIL=you@example.com
 

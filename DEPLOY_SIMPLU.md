@@ -2,7 +2,7 @@
 
 ## Înainte de Deploy
 
-1. **Domeniu configurat**: `api.example.com` → IP server
+1. **Domeniu configurat**: `example.com` → IP server
 2. **Porturi deschise**: 80, 443 (firewall/cloud provider)
 
 ---
@@ -26,9 +26,9 @@ Completează:
 ```env
 GROQAPIKEY=your-groq-key
 telegramToken=your-telegram-token
-DOMAIN=api.example.com         # ⚠️ IMPORTANT!
-WEB_DOMAIN=app.example.com     # Domeniul pe care rulează interfața web
-NEXT_PUBLIC_API_URL=https://api.example.com
+DOMAIN=example.com             # ⚠️ IMPORTANT!
+WEB_DOMAIN=example.com         # Lasă identic dacă UI-ul e pe același domeniu
+NEXT_PUBLIC_API_URL=https://example.com/api
 API_BASE_URL=http://app:8000
 SSL_EMAIL=your-email@gmail.com  # ⚠️ IMPORTANT!
 ENCRYPTION_KEY=generate-random-32-chars
@@ -56,7 +56,7 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml ps
 
 # Test API
-curl https://api.example.com/health
+curl https://example.com/health
 ```
 
 **Expected**: `{"status":"healthy"}`
@@ -65,9 +65,9 @@ curl https://api.example.com/health
 
 ## 🎯 Access API
 
-- **Health**: `https://api.example.com/health`
-- **Docs**: `https://api.example.com/docs`
-- **API**: `https://api.example.com/api/v1/...`
+- **Health**: `https://example.com/health`
+- **Docs**: `https://example.com/docs`
+- **API**: `https://example.com/api/v1/...`
 
 ---
 

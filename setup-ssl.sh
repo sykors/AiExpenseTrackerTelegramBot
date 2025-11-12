@@ -38,21 +38,9 @@ if [ -z "$SSL_EMAIL" ]; then
 fi
 
 if [ -z "$WEB_DOMAIN" ]; then
-    echo -e "${RED}Error: WEB_DOMAIN not set in .env${NC}"
-    echo "Set WEB_DOMAIN to the hostname that will serve the Next.js UI (e.g., app.example.com)"
-    exit 1
-fi
-
-if [ "$WEB_DOMAIN" = "$DOMAIN" ]; then
-    echo -e "${RED}Error: WEB_DOMAIN must be different from DOMAIN${NC}"
-    echo "Use two hostnames, e.g. DOMAIN=api.example.com and WEB_DOMAIN=app.example.com"
-    exit 1
-fi
-
-if [ ! -f nginx/nginx.conf.template ]; then
-    echo -e "${RED}Error: nginx/nginx.conf.template is missing${NC}"
-    echo "Please make sure you pulled the latest repository version."
-    exit 1
+    echo -e "${YELLOW}WEB_DOMAIN not set in .env -> using $DOMAIN${NC}"
+    WEB_DOMAIN=$DOMAIN
+    export WEB_DOMAIN
 fi
 
 echo -e "${GREEN}Domain: $DOMAIN${NC}"

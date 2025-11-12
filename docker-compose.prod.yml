@@ -111,15 +111,13 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./nginx/start-nginx.sh:/start-nginx.sh:ro
       - ./nginx/ssl:/etc/letsencrypt:ro
       - ./nginx/certbot-www:/var/www/certbot
     environment:
       DOMAIN: ${DOMAIN}
       WEB_DOMAIN: ${WEB_DOMAIN}
-    command: >-
-      /bin/sh -c "envsubst '$$DOMAIN $$WEB_DOMAIN' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-      && exec nginx -g 'daemon off;'"
+    command: ["/bin/sh", "/start-nginx.sh"]
     restart: always
     networks:
       - expense-bot-network

@@ -356,6 +356,27 @@ services:
     networks:
       - expensebot_network
 
+  web:
+    build:
+      context: ./expense-web
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        - NEXT_PUBLIC_API_URL=http://65.21.110.105:8000
+        - API_BASE_URL=http://app:8000
+    container_name: expensebot_web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://65.21.110.105:8000
+      - API_BASE_URL=http://app:8000
+    depends_on:
+      - app
+    networks:
+      - expensebot_network
+
   nginx:
     image: nginx:alpine
     container_name: expensebot_nginx
@@ -368,6 +389,7 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - app
+      - web
     networks:
       - expensebot_network
 
@@ -442,20 +464,25 @@ http {
         server app:8000;
     }
 
+    upstream web {
+        server web:3000;
+    }
+
     server {
         listen 80;
         server_name _;
 
         client_max_body_size 50M;
 
+        # Web UI (Next.js)
         location / {
-            proxy_pass http://app;
+            proxy_pass http://web;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
 
-            # WebSocket support
+            # WebSocket support for Next.js hot reload
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
@@ -466,6 +493,36 @@ http {
             proxy_read_timeout 60s;
         }
 
+        # API Backend
+        location /api/ {
+            proxy_pass http://app/api/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # Timeouts
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+
+        # API Docs
+        location /docs {
+            proxy_pass http://app/docs;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /openapi.json {
+            proxy_pass http://app/openapi.json;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+
+        # Health check
         location /health {
             access_log off;
             proxy_pass http://app/health;
@@ -594,6 +651,27 @@ fi
 print_success "Application structure created"
 
 # ============================================================================
+# STEP 12.5: COPY AND CONFIGURE WEB UI
+# ============================================================================
+
+print_header "STEP 12.5: Setting Up Web UI (Next.js)"
+
+# Check if expense-web directory exists in the repository
+if [ -d "expense-web" ]; then
+    print_info "Web UI found in repository"
+
+    # Create .env file for Next.js
+    cat > expense-web/.env.local << EOF
+NEXT_PUBLIC_API_URL=http://$(hostname -I | awk '{print $1}'):8000
+API_BASE_URL=http://app:8000
+EOF
+
+    print_success "Web UI configuration created"
+else
+    print_warning "Web UI (expense-web) not found in repository. Skipping UI setup."
+fi
+
+# ============================================================================
 # STEP 13: CONFIGURE FIREWALL
 # ============================================================================
 
@@ -608,6 +686,10 @@ if command -v ufw &> /dev/null; then
     # Allow HTTP and HTTPS
     ufw allow 80/tcp
     ufw allow 443/tcp
+
+    # Allow API and Web UI ports (for direct access)
+    ufw allow 8000/tcp
+    ufw allow 3000/tcp
 
     # Enable UFW
     echo "y" | ufw enable
@@ -683,9 +765,20 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Deployment Summary${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo -e "${BLUE}Application Directory:${NC} $APP_DIR"
-echo -e "${BLUE}Application URL:${NC} http://$(hostname -I | awk '{print $1}'):8000"
-echo -e "${BLUE}API Documentation:${NC} http://$(hostname -I | awk '{print $1}'):8000/docs"
-echo -e "${BLUE}Health Check:${NC} http://$(hostname -I | awk '{print $1}'):8000/health"
+echo -e ""
+echo -e "${GREEN}🌐 Web UI (Next.js):${NC}"
+echo -e "   ${BLUE}http://$(hostname -I | awk '{print $1}')${NC}"
+echo -e "   ${BLUE}http://$(hostname -I | awk '{print $1}'):3000${NC} (direct)"
+echo -e ""
+echo -e "${GREEN}🔌 Backend API:${NC}"
+echo -e "   ${BLUE}http://$(hostname -I | awk '{print $1}'):8000${NC}"
+echo -e "   ${BLUE}http://$(hostname -I | awk '{print $1}')/api/${NC} (via nginx)"
+echo -e ""
+echo -e "${GREEN}📚 API Documentation:${NC}"
+echo -e "   ${BLUE}http://$(hostname -I | awk '{print $1}')/docs${NC}"
+echo -e ""
+echo -e "${GREEN}❤️  Health Check:${NC}"
+echo -e "   ${BLUE}http://$(hostname -I | awk '{print $1}')/health${NC}"
 echo -e "${GREEN}========================================${NC}"
 
 echo -e "\n${YELLOW}Useful Commands:${NC}"
