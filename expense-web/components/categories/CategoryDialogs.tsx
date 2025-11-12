@@ -5,7 +5,11 @@ import type { CategoryResponse } from "@/lib/types";
 import { PUBLIC_API_BASE } from "@/lib/api";
 import { Loader2, Sparkles, X } from "lucide-react";
 import { SketchPicker, ColorResult } from "react-color";
-import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
+import EmojiPicker, {
+  EmojiClickData,
+  Theme,
+  EmojiStyle,
+} from "emoji-picker-react";
 
 const COLOR_PALETTE = [
   "#10B981",
@@ -508,7 +512,7 @@ function CategoryForm({
               <div className="absolute right-0 top-full z-50 mt-3 rounded-2xl border border-white/10 bg-slate-900/90 p-3">
                 <EmojiPicker
                   onEmojiClick={handleEmojiClick}
-                  emojiStyle="native"
+                  emojiStyle={EmojiStyle.NATIVE}
                   theme={Theme.DARK}
                   lazyLoadEmojis
                   searchDisabled={false}
