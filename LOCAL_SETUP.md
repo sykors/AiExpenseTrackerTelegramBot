@@ -2,6 +2,22 @@
 
 Run the Expense Bot AI directly on your machine without Docker!
 
+## TL;DR – npm workflow
+
+```bash
+cp .env.example .env   # fill in GROQ_API_KEY, TELEGRAM_BOT_TOKEN, etc.
+npm install
+npm run bootstrap      # prepares Python venv + SQLite DB
+npm run dev            # starts FastAPI (8000) + Next.js (3000)
+```
+
+- The scripts default to `DATABASE_URL=sqlite:///./expensebot.db`. Export `DATABASE_URL` before running them if you want to point at Postgres or another database.
+- `npm run backend:dev` starts only the API (useful for debugging the bot)
+- `npm run web:dev` starts only the Next.js dashboard inside `expense-web`
+- `npm run backend:setup` can be re-run anytime you update Python deps or want to recreate the DB
+
+The rest of this guide documents manual control of the backend if you prefer running each command yourself.
+
 ## Prerequisites
 
 - Python 3.11 or higher

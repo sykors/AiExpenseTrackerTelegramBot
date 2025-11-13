@@ -1,0 +1,13 @@
+node_modules/
+expense-web/node_modules/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+npm-debug.log*
+.DS_Store
+.env.local
+.env.development
+.env.production.local
+.env.test.local

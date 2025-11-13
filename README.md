@@ -21,6 +21,42 @@ AI-powered expense tracking bot that extracts expense data from photos, voice me
 - **Containerization**: Docker + Docker Compose
 - **ORM**: SQLAlchemy + Alembic migrations
 
+## Run Locally with npm (no Docker)
+
+This repo now boots the Python API and the Next.js dashboard without Docker, only using `npm` commands:
+
+1. **Configure environment**  
+   ```bash
+   cp .env.example .env            # fill in GROQ_API_KEY, TELEGRAM_BOT_TOKEN, ENCRYPTION_KEY, etc.
+   ```
+   When `npm run backend:setup` runs it will read the credentials from `.env`. Without the keys the Telegram bot and Groq features will not work.
+
+2. **Install tooling** (installs the root dev tool + Next.js workspace)  
+   ```bash
+   npm install
+   ```
+
+3. **Bootstrap the backend virtualenv + DB**  
+   ```bash
+   npm run bootstrap   # creates venv, pip install, alembic upgrade, double‑checks web deps
+   ```
+
+4. **Start everything**  
+   ```bash
+   npm run dev
+   ```
+   This runs the FastAPI server on `http://localhost:8000` and the Next.js app on `http://localhost:3000` via `concurrently`. The UI automatically points to `NEXT_PUBLIC_API_URL` (defaults to the local API).
+
+> By default these scripts point `DATABASE_URL` to the local SQLite file `expensebot.db`. Export your own `DATABASE_URL` before running the scripts if you prefer Postgres.
+
+Useful extra scripts:
+
+- `npm run backend:dev` – run only the FastAPI server (requires previous `npm run backend:setup`)
+- `npm run web:dev` – run only the Next.js UI (`expense-web`)
+- `npm run web:build` / `npm run web:start` – production build + start for the UI
+
+> Tip: If you ever change Python dependencies, re-run `npm run backend:setup`. If you reset your database, delete `expensebot.db` and repeat the bootstrap step.
+
 ## Quick Start
 
 ### Prerequisites

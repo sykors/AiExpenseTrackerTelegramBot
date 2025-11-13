@@ -9,9 +9,10 @@ python-dotenv==1.0.0
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
-httpx==0.25.1
+httpx==0.25.2
 groq==0.4.0
 cryptography==41.0.7
 tenacity==8.2.3
 python-telegram-bot==20.7
 beautifulsoup4==4.12.2
+opencv-python-headless==4.10.0.84

@@ -1,0 +1,18 @@
+{
+  "name": "expense-bot-ai",
+  "private": true,
+  "scripts": {
+    "bootstrap": "npm run backend:setup && npm run web:install",
+    "backend:setup": "bash ./scripts/backend_setup.sh",
+    "backend:dev": "bash ./scripts/backend_dev.sh",
+    "web:install": "npm install --prefix expense-web",
+    "web:dev": "npm run dev --prefix expense-web",
+    "web:build": "npm run build --prefix expense-web",
+    "web:start": "npm run start --prefix expense-web",
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"npm run backend:dev\" \"npm run web:dev\"",
+    "postinstall": "npm run web:install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,8 +1,14 @@
 from functools import lru_cache
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore",
+    )
+
     # Database
     DATABASE_URL: str = "postgresql://expenseuser:expensepass@db:5432/expensebot"
 
@@ -27,10 +33,6 @@ class Settings(BaseSettings):
     NEXT_PUBLIC_API_URL: str | None = None
     API_BASE_URL: str | None = None
     ADDITIONAL_CORS_ORIGINS: str = ""
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
     @property
     def allowed_origins(self) -> list[str]:
